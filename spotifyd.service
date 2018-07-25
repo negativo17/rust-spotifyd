@@ -1,0 +1,14 @@
+[Unit]
+Description=A Spotify daemon
+Documentation=https://github.com/Spotifyd/spotifyd
+
+[Service]
+ExecStart=/usr/sbin/spotifyd --no-daemon
+User=spotifyd
+Group=spotifyd
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target
+
