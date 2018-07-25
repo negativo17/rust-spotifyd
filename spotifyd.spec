@@ -1,5 +1,5 @@
-%global user %{name}
-%global group %{name}
+%global service_user %{name}
+%global service_group %{name}
 
 Name:           spotifyd
 Version:        0.2.2
@@ -17,6 +17,7 @@ Source3:        %{name}.conf
 
 BuildRequires:  alsa-lib-devel
 #BuildRequires:  firewalld-filesystem
+BuildRequires:  openssl-devel
 BuildRequires:  pulseaudio-libs-devel
 BuildRequires:  rust-packaging
 BuildRequires:  systemd
@@ -45,18 +46,15 @@ Pulseaudio backend.
 
 %install
 mkdir -p %{buildroot}%{_localstatedir}/cache/%{name}
-
+install -m 0755 -D -p target/release/%{name} %{buildroot}/%{_sbindir}/%{name}
 install -m 0644 -D -p %{SOURCE2} %{buildroot}%{_unitdir}/%{name}.service
 install -m 0644 -D -p %{SOURCE3} %{buildroot}%{_sysconfdir}/%{name}.conf
 
-%cargo_install
-mv %{buildroot}/%{_bindir} %{buildroot}/%{_sbindir}
-
 %pre
-getent group %{group} >/dev/null || groupadd -r %{group}
-getent passwd %{user} >/dev/null || \
-    useradd -r -g %{group} -d / -s /sbin/nologin \
-    -c "Spotify daemon" %{user}
+getent group %{service_group} >/dev/null || groupadd -r %{service_group}
+getent passwd %{service_user} >/dev/null || \
+    useradd -r -g %{service_group} -d / -s /sbin/nologin \
+    -c "Spotify daemon" %{service_user}
 exit 0
 
 %post
@@ -72,8 +70,8 @@ exit 0
 %files
 %license LICENCE
 %doc README.md
-%attr(640,%{user},%{group}) %{_sysconfdir}/%{name}.conf
-%attr(750,%{user},%{group}) %{_localstatedir}/cache/%{name}
+%attr(640,%{service_user},%{service_group}) %config %{_sysconfdir}/%{name}.conf
+%attr(750,%{service_user},%{service_group}) %{_localstatedir}/cache/%{name}
 %{_sbindir}/%{name}
 #%{_prefix}/lib/firewalld/services/%{name}.xml
 %{_unitdir}/%{name}.service
