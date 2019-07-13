@@ -1,0 +1,14 @@
+(
+set -eu
+/usr/bin/mkdir -p .cargo
+cat > .cargo/config << EOF
+[build]
+rustc = "/usr/bin/rustc"
+rustdoc = "/usr/bin/rustdoc"
+rustflags = ["-Copt-level=3", "-Cdebuginfo=2", "-Clink-arg=-Wl,-z,relro,-z,now", "-Ccodegen-units=1", ]
+
+[term]
+verbose = true
+EOF
+/usr/bin/rm -f Cargo.lock
+)
