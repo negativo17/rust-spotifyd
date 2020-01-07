@@ -2,7 +2,7 @@
 %global service_group %{name}
 
 Name:           spotifyd
-Version:        0.2.11
+Version:        0.2.20
 Release:        1%{?dist}
 Summary:        A Spotify daemon
 License:        GPLv3
@@ -10,24 +10,25 @@ URL:            https://github.com/Spotifyd/spotifyd
 
 ExclusiveArch:  %{rust_arches}
 
-Source0:        %{url}/archive/%{version}.tar.gz#/%{name}-%{version}.tar.gz
+Source0:        %{url}/archive/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
 Source1:        %{name}.service
 Source2:        %{name}.conf
+Source3:        %{name}.xml
 # Override Cargo macros
 Source10:       %{name}.cargo_prep
 Source11:       %{name}.cargo_build
 
 BuildRequires:  alsa-lib-devel
 BuildRequires:  dbus-devel
-#BuildRequires:  firewalld-filesystem
+BuildRequires:  firewalld-filesystem
 BuildRequires:  gmp-devel
 BuildRequires:  openssl-devel
 BuildRequires:  pulseaudio-libs-devel
 BuildRequires:  rust-packaging
 BuildRequires:  systemd
 
-#Requires:       firewalld-filesystem
-#Requires(post): firewalld-filesystem
+Requires:       firewalld-filesystem
+Requires(post): firewalld-filesystem
 Requires(pre):  shadow-utils
 
 %description
@@ -50,12 +51,15 @@ Pulseaudio backend.
 %global cargo_build %(cat %{SOURCE11})
 %cargo_build
 
+rm -fr .cargo
+
 %install
 mkdir -p %{buildroot}%{_localstatedir}/cache/%{name}
 mkdir -p %{buildroot}%{_localstatedir}/%{name}
 install -m 0755 -D -p target/release/%{name} %{buildroot}/%{_sbindir}/%{name}
 install -m 0644 -D -p %{SOURCE1} %{buildroot}%{_unitdir}/%{name}.service
 install -m 0644 -D -p %{SOURCE2} %{buildroot}%{_sysconfdir}/%{name}.conf
+install -m 0644 -D -p %{SOURCE3} %{buildroot}%{_prefix}/lib/firewalld/services/%{name}.xml
 
 %pre
 getent group %{service_group} >/dev/null || groupadd -r %{service_group}
@@ -81,10 +85,14 @@ exit 0
 %attr(750,%{service_user},%{service_group}) %{_localstatedir}/cache/%{name}
 %attr(750,%{service_user},%{service_group}) %{_localstatedir}/%{name}
 %{_sbindir}/%{name}
-#%{_prefix}/lib/firewalld/services/%{name}.xml
+%{_prefix}/lib/firewalld/services/%{name}.xml
 %{_unitdir}/%{name}.service
 
 %changelog
+* Tue Jan 07 2020 Simone Caronni <negativo17@gmail.com> - 0.2.20-1
+- Update to 0.2.20.
+- Enable firewall and zeroconf port.
+
 * Sat Jul 13 2019 Simone Caronni <negativo17@gmail.com> - 0.2.11-1
 - Update to 0.2.11.
 - Enable DBUS keyring support.
