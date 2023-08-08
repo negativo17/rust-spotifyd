@@ -1,3 +1,0 @@
-%if ! 00
-  /usr/bin/env CARGO_HOME=.cargo RUSTC_BOOTSTRAP=1 /usr/bin/cargo build -j2 -Z avoid-dev-deps --release --features "pulseaudio_backend,dbus_mpris,dbus_keyring"
-%endif

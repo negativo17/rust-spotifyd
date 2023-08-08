@@ -5,10 +5,19 @@ cat > .cargo/config << EOF
 [build]
 rustc = "/usr/bin/rustc"
 rustdoc = "/usr/bin/rustdoc"
-rustflags = ["-Copt-level=3", "-Cdebuginfo=2", "-Clink-arg=-Wl,-z,relro,-z,now", "-Ccodegen-units=1", ]
+
+[env]
+CFLAGS = "%{build_cflags}"
+CXXFLAGS = "%{build_cxxflags}"
+LDFLAGS = "%{build_ldflags}"
+
+[install]
+root = "%{buildroot}%{_prefix}"
 
 [term]
 verbose = true
+
 EOF
-/usr/bin/rm -f Cargo.lock
+%{__rm} -f Cargo.lock
+%{__rm} -f Cargo.toml.orig
 )
