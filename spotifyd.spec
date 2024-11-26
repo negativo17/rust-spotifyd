@@ -6,7 +6,7 @@
 
 Name:           spotifyd
 Version:        0.3.5
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        A Spotify daemon
 License:        GPLv3
 URL:            https://github.com/Spotifyd/spotifyd
@@ -52,7 +52,7 @@ Pulseaudio backend.
 %cargo_prep
 
 %build
-%cargo_build -n -f pulseaudio_backend,dbus_keyring
+%cargo_build -n -f pulseaudio_backend,dbus_keyring,dbus_mpris
 
 %install
 mkdir -p %{buildroot}%{_localstatedir}/cache/%{name}
@@ -90,6 +90,9 @@ exit 0
 %{_unitdir}/%{name}.service
 
 %changelog
+* Tue Aug 29 2023 Simone Caronni <negativo17@gmail.com> - 0.3.5-2
+- Enable dbus_mpris.
+
 * Tue Aug 08 2023 Simone Caronni <negativo17@gmail.com> - 0.3.5-1
 - Update to 0.3.5.
 - Improve cargo RPM macro compliance.
