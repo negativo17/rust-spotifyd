@@ -1,5 +1,5 @@
 [Unit]
-Description=A Spotify daemon
+Description=A spotify playing daemon
 Documentation=https://github.com/Spotifyd/spotifyd
 Wants=sound.target
 After=sound.target
@@ -7,10 +7,11 @@ Wants=network-online.target
 After=network-online.target
 
 [Service]
-ExecStart=/usr/sbin/spotifyd --no-daemon
+ExecStart=/usr/bin/spotifyd --no-daemon --use-mpris=false
+Restart=always
+RestartSec=12
 User=spotifyd
 Group=spotifyd
-Restart=always
 
 [Install]
 WantedBy=default.target
