@@ -26,6 +26,7 @@ BuildRequires:  dbus-devel
 BuildRequires:  firewalld-filesystem
 BuildRequires:  openssl-devel
 BuildRequires:  pulseaudio-libs-devel
+BuildRequires:  systemd-rpm-macros
 
 %if 0%{?rhel} == 9 || 0%{?rhel} == 10 || 0%{?fedora} == 41
 %{?sysusers_requires_compat}
