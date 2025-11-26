@@ -4,7 +4,7 @@
 %global crate spotifyd
 
 Name:           rust-spotifyd
-Version:        0.4.1
+Version:        0.4.2
 Release:        1%{?dist}
 Summary:        Spotify daemon
 
@@ -17,8 +17,6 @@ Source3:        %{crate}.xml
 Source4:        %{crate}-sysusers.conf
 # Automatically generated patch to strip dependencies and normalize metadata
 Patch0:         %{crate}-fix-metadata-auto.diff
-# https://github.com/Spotifyd/spotifyd/pull/1362
-Patch2:         %{crate}-librespot-0.7.1.patch
 
 BuildRequires:  alsa-lib-devel
 BuildRequires:  cargo-rpm-macros >= 26
@@ -103,7 +101,7 @@ sed -i -e 's/^#zeroconf_port.*/zeroconf_port = 57621/g' \
 %check
 %cargo_test
 
-%if 0%{?rhel} == 10 || 0%{?fedora} == 41
+%if 0%{?rhel} == 10
 %pre
 %sysusers_create_compat %{SOURCE4}
 %endif
@@ -134,6 +132,9 @@ sed -i -e 's/^#zeroconf_port.*/zeroconf_port = 57621/g' \
 %{_unitdir}/%{crate}.service
 
 %changelog
+* Wed Nov 26 2025 Simone Caronni <negativo17@gmail.com> - 0.4.2-1
+- Update to 0.4.2.
+
 * Mon Sep 22 2025 Simone Caronni <negativo17@gmail.com> - 0.4.1-1
 - Rework package completely.
 - Use new rust packaging guidelines for vendored binaries.
