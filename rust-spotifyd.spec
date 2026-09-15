@@ -1,3 +1,5 @@
+%bcond check 1
+
 # prevent library files from being installed
 %global cargo_install_lib 0
 
@@ -5,7 +7,7 @@
 
 Name:           rust-spotifyd
 Version:        0.4.2
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Spotify daemon
 
 License:        GPL-3.0-only
@@ -17,6 +19,8 @@ Source3:        %{crate}.xml
 Source4:        %{crate}-sysusers.conf
 # Automatically generated patch to strip dependencies and normalize metadata
 Patch0:         %{crate}-fix-metadata-auto.diff
+# OpenSSL 4 support
+Patch1:         %{crate}-openssl4.patch
 
 BuildRequires:  alsa-lib-devel
 BuildRequires:  cargo-rpm-macros >= 26
@@ -43,14 +47,16 @@ Pulseaudio backend.}
 
 %package -n %{crate}
 Summary:        %{summary}
-License:        GPL-3.0-or-later
-# Detailed breakdown:
+# spotifyd itself is GPL-3.0-only and everything statically linked into it is
+# permissive or weak copyleft, so that is the license of the binary.
+License:        GPL-3.0-only
+# Detailed breakdown, from %%cargo_license_summary; LICENSE.dependencies in the
+# package contains the full per-crate listing:
 # (Apache-2.0 OR MIT) AND BSD-3-Clause
+# (MIT OR Apache-2.0) AND Unicode-3.0
 # 0BSD OR MIT OR Apache-2.0
 # Apache-2.0
-# Apache-2.0 AND ISC
 # Apache-2.0 OR BSL-1.0
-# Apache-2.0 OR ISC OR MIT
 # Apache-2.0 OR MIT
 # Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT
 # BSD-2-Clause OR Apache-2.0 OR MIT
@@ -61,13 +67,14 @@ License:        GPL-3.0-or-later
 # ISC AND (Apache-2.0 OR ISC) AND OpenSSL
 # LGPL-3.0-or-later OR MPL-2.0
 # MIT
-# MIT AND (MIT OR Apache-2.0)
 # MIT OR Apache-2.0
+# MIT OR Apache-2.0 OR LGPL-2.1-or-later
 # MIT OR BSD-3-Clause
 # MIT OR Zlib OR Apache-2.0
 # MPL-2.0
 # Unicode-3.0
 # Unlicense OR MIT
+# Zlib
 # Zlib OR Apache-2.0 OR MIT
 
 %description -n %{crate} %{_description}
@@ -98,23 +105,25 @@ install -m 0644 -D -p contrib/%{crate}.conf %{buildroot}%{_sysconfdir}/%{crate}.
 sed -i -e 's/^#zeroconf_port.*/zeroconf_port = 57621/g' \
     %{buildroot}%{_sysconfdir}/%{crate}.conf
 
+%if %{with check}
 %check
 %cargo_test
+%endif
 
 %if 0%{?rhel} == 10
-%pre
+%pre -n %{crate}
 %sysusers_create_compat %{SOURCE4}
 %endif
 
-%post
-%systemd_post %{name}.service
+%post -n %{crate}
+%systemd_post %{crate}.service
 %firewalld_reload
 
-%preun
-%systemd_preun %{name}.service
+%preun -n %{crate}
+%systemd_preun %{crate}.service
 
-%postun
-%systemd_postun_with_restart %{name}.service
+%postun -n %{crate}
+%systemd_postun_with_restart %{crate}.service
 
 %files -n %{crate}
 %license LICENSE
@@ -126,12 +135,16 @@ sed -i -e 's/^#zeroconf_port.*/zeroconf_port = 57621/g' \
 %doc README.md
 %{_bindir}/%{crate}
 %{_prefix}/lib/firewalld/services/%{crate}.xml
-%{_sysconfdir}/%{crate}.conf
+%config(noreplace) %{_sysconfdir}/%{crate}.conf
 %{_sysusersdir}/%{crate}.conf
 %{_userunitdir}/%{crate}.service
 %{_unitdir}/%{crate}.service
 
 %changelog
+* Tue Sep 15 2026 Simone Caronni <negativo17@gmail.com> - 0.4.2-2
+- Build against OpenSSL 4, fix the license and the systemd scriptlets.
+- Mark /etc/spotifyd.conf as a configuration file.
+
 * Wed Nov 26 2025 Simone Caronni <negativo17@gmail.com> - 0.4.2-1
 - Update to 0.4.2.
 
